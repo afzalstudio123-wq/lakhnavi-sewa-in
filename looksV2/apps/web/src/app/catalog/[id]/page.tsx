@@ -147,7 +147,7 @@ interface Props {
 }
 
 export default function ServiceDetailsPage({ params }: Props) {
-  const { t, language, user, partnerCatalog } = useApp();
+  const { t, language, user, partnerCatalog, services } = useApp();
   const router = useRouter();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
@@ -170,12 +170,13 @@ export default function ServiceDetailsPage({ params }: Props) {
           throw new Error('Not found');
         }
       } catch (err) {
-        // Fallback
-        const fallback = STATIC_FALLBACK_SERVICES[params.id];
-        if (fallback) {
-          setService(fallback);
+        // Search in stateful global services array
+        const found = services.find((s) => s.id === params.id);
+        if (found) {
+          setService(found);
         } else {
-          setService(null);
+          const fallback = STATIC_FALLBACK_SERVICES[params.id];
+          setService(fallback || null);
         }
       } finally {
         setLoading(false);
@@ -183,7 +184,7 @@ export default function ServiceDetailsPage({ params }: Props) {
     };
 
     fetchService();
-  }, [params.id]);
+  }, [params.id, services]);
 
   if (loading) {
     return (

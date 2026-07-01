@@ -6,10 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Info, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export const NotificationToast: React.FC = () => {
-  const { notifications } = useApp();
+  const { notifications, user } = useApp();
+  const isAdmin = user?.role === 'ADMIN';
 
   return (
-    <div className="fixed top-6 right-6 z-50 space-y-3.5 max-w-sm w-full pointer-events-none">
+    <div className={`fixed top-6 right-6 z-50 space-y-3.5 max-w-sm w-full pointer-events-none ${isAdmin ? 'block' : 'hidden'}`}>
       <AnimatePresence>
         {notifications.map((item) => (
           <motion.div
