@@ -329,7 +329,10 @@ export default function ServiceDetailsPage({ params }: Props) {
         </div>
 
         <button
-          onClick={() => {
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             if (!isAvailable) return;
             if (!user) {
               setIsAuthModalOpen(true);

@@ -13,7 +13,7 @@ const LOCALITIES = ["Gomti Nagar", "Hazratganj", "Aliganj", "Indiranagar", "Chow
 const TIME_SLOTS = ["09:00 AM", "11:00 AM", "01:00 PM", "03:00 PM", "05:00 PM"];
 
 function BookingContent() {
-  const { t, user, showToast, language, partnerCatalog } = useApp();
+  const { t, user, showToast, language, partnerCatalog, services } = useApp();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -69,21 +69,27 @@ function BookingContent() {
           throw new Error('Not found');
         }
       } catch (err) {
-        // Fallback static
-        const staticServices = [
-          { id: "srv_beauty_1", category: "Beauty & Grooming", title_en: "Premium Salon at Home for Women", price_inr: 1200, locality: "Gomti Nagar", provider_id: "prov_1" },
-          { id: "srv_repair_1", category: "Home Repairs & Maintenance", title_en: "Emergency Plumbing Diagnostics & Repair", price_inr: 490, locality: "Hazratganj", provider_id: "prov_2" },
-          { id: "srv_cleaning_1", category: "Cleaning & Pest Control", title_en: "Deep Home Sanitization & Cleaning", price_inr: 1800, locality: "Aliganj", provider_id: "prov_3" },
-          { id: "srv_smart_1", category: "Native Smart Products", title_en: "Smart IoT Hub & Camera Setup", price_inr: 1500, locality: "Indiranagar", provider_id: "prov_4" },
-          { id: "srv_labour_1", category: "Indian Labours", title_en: "Skilled Daily Wage Mason / Helper", price_inr: 800, locality: "Chowk", provider_id: "prov_5" },
-          { id: "srv_contractor_1", category: "Contractors & Builders", title_en: "Premium Home Renovation Consultation", price_inr: 2500, locality: "Hazratganj", provider_id: "prov_6" }
-        ];
-        const s = staticServices.find(item => item.id === serviceId);
+        // Find in stateful global services array (case-insensitive)
+        const s = services.find(item => item.id.toLowerCase() === serviceId.toLowerCase());
         if (s) {
           setService(s);
         } else {
-          showToast('Service details failed to load', 'error');
-          router.push('/catalog');
+          // Fallback static
+          const staticServices = [
+            { id: "srv_beauty_1", category: "Beauty & Grooming", title_en: "Premium Salon at Home for Women", price_inr: 1200, locality: "Gomti Nagar", provider_id: "prov_1" },
+            { id: "srv_repair_1", category: "Home Repairs & Maintenance", title_en: "Emergency Plumbing Diagnostics & Repair", price_inr: 490, locality: "Hazratganj", provider_id: "prov_2" },
+            { id: "srv_cleaning_1", category: "Cleaning & Pest Control", title_en: "Deep Home Sanitization & Cleaning", price_inr: 1800, locality: "Aliganj", provider_id: "prov_3" },
+            { id: "srv_smart_1", category: "Native Smart Products", title_en: "Smart IoT Hub & Camera Setup", price_inr: 1500, locality: "Indiranagar", provider_id: "prov_4" },
+            { id: "srv_labour_1", category: "Indian Labours", title_en: "Skilled Daily Wage Mason / Helper", price_inr: 800, locality: "Chowk", provider_id: "prov_5" },
+            { id: "srv_contractor_1", category: "Contractors & Builders", title_en: "Premium Home Renovation Consultation", price_inr: 2500, locality: "Hazratganj", provider_id: "prov_6" }
+          ];
+          const backup = staticServices.find(item => item.id.toLowerCase() === serviceId.toLowerCase());
+          if (backup) {
+            setService(backup);
+          } else {
+            showToast('Service details failed to load', 'error');
+            router.push('/catalog');
+          }
         }
       } finally {
         setLoading(false);
@@ -91,7 +97,7 @@ function BookingContent() {
     };
 
     fetchService();
-  }, [searchParams]);
+  }, [searchParams, services]);
 
   // Set default dates
   useEffect(() => {
