@@ -1,0 +1,122 @@
+[
+  {
+    "id": "bk_1",
+    "customer_id": "usr_customer_1",
+    "provider_id": "prov_1",
+    "service_id": "srv_beauty_1",
+    "scheduled_date": "2026-07-02",
+    "scheduled_time": "11:00 AM",
+    "address": "402, Gomti Heights, Gomti Nagar, Lucknow",
+    "status": "CONFIRMED",
+    "total_amount": 1200,
+    "created_at": "2026-06-29T10:00:00Z"
+  },
+  {
+    "id": "bk_2",
+    "customer_id": "usr_customer_1",
+    "provider_id": "prov_2",
+    "service_id": "srv_repair_1",
+    "scheduled_date": "2026-06-28",
+    "scheduled_time": "02:00 PM",
+    "address": "402, Gomti Heights, Gomti Nagar, Lucknow",
+    "status": "COMPLETED",
+    "total_amount": 490,
+    "created_at": "2026-06-28T09:30:00Z"
+  },
+  {
+    "id": "bk_3",
+    "customer_id": "usr_customer_1",
+    "provider_id": "prov_3",
+    "service_id": "srv_cleaning_1",
+    "scheduled_date": "2026-07-05",
+    "scheduled_time": "10:00 AM",
+    "address": "402, Gomti Heights, Gomti Nagar, Lucknow",
+    "status": "PENDING",
+    "total_amount": 1800,
+    "created_at": "2026-06-30T11:00:00Z"
+  },
+  {
+    "id": "bk_480",
+    "customer_id": "usr_1782812051889",
+    "provider_id": "prov_1",
+    "service_id": "srv_beauty_1",
+    "scheduled_date": "2026-07-01",
+    "scheduled_time": "09:00 AM",
+    "address": "bbd lucknow, Gomti Nagar, Lucknow",
+    "status": "PENDING",
+    "total_amount": 1200,
+    "created_at": "2026-06-30T09:35:30.169Z"
+  },
+  {
+    "id": "bk_720",
+    "customer_id": "usr_customer_1",
+    "provider_id": "prov_3",
+    "service_id": "srv_cleaning_1",
+    "scheduled_date": "2026-07-02",
+    "scheduled_time": "01:00 PM",
+    "address": "greencity apartment no 2\n, Gomti Nagar, Lucknow",
+    "status": "PENDING",
+    "total_amount": 1800,
+    "created_at": "2026-07-01T09:48:56.753Z"
+  },
+  {
+    "id": "bk_688",
+    "customer_id": "admin_root",
+    "provider_id": "prov_1",
+    "service_id": "srv_beauty_1",
+    "scheduled_date": "2026-07-16",
+    "scheduled_time": "11:00 AM",
+    "address": "greencity 2, Gomti Nagar, Lucknow",
+    "status": "CANCELLED",
+    "total_amount": 1200,
+    "created_at": "2026-07-01T09:54:25.747Z"
+  },
+  {
+    "id": "bk_997",
+    "customer_id": "usr_customer_1",
+    "provider_id": "prov_1",
+    "service_id": "srv_beauty_1",
+    "scheduled_date": "2026-07-02",
+    "scheduled_time": "09:00 AM",
+    "address": "kamta chinhat lucknow\n, Gomti Nagar, Lucknow",
+    "status": "PENDING",
+    "total_amount": 1200,
+    "created_at": "2026-07-01T10:25:30.828Z"
+  },
+  {
+    "id": "bk_831",
+    "customer_id": "prov_1782901651070",
+    "provider_id": "prov_1",
+    "service_id": "srv_beauty_1",
+    "scheduled_date": "2026-07-02",
+    "scheduled_time": "09:00 AM",
+    "address": "kata ke passs \n, Gomti Nagar, Lucknow",
+    "status": "PENDING",
+    "total_amount": 1200,
+    "created_at": "2026-07-01T10:31:05.367Z"
+  },
+  {
+    "id": "bk_719",
+    "customer_id": "usr_afzal",
+    "provider_id": "prov_1",
+    "service_id": "srv_beauty_1",
+    "scheduled_date": "2026-07-02",
+    "scheduled_time": "09:00 AM",
+    "address": "jfhfhsfjsfh, Gomti Nagar, Lucknow",
+    "status": "PENDING",
+    "total_amount": 1200,
+    "created_at": "2026-07-01T10:42:41.687Z"
+  },
+  {
+    "id": "bk_852",
+    "customer_id": "usr_afzal",
+    "provider_id": "prov_3",
+    "service_id": "srv_cleaning_1",
+    "scheduled_date": "2026-07-02",
+    "scheduled_time": "09:00 AM",
+    "address": "ssjsjfhufhjusd, Gomti Nagar, Lucknow",
+    "status": "PENDING",
+    "total_amount": 1499,
+    "created_at": "2026-07-01T18:50:46.855Z"
+  }
+]

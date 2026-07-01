@@ -1,0 +1,25 @@
+[
+  {
+    "id": "usr_customer_1",
+    "name": "Arjun Mishra",
+    "email": "arjun@example.com",
+    "phone": "9876543210",
+    "role": "CUSTOMER",
+    "locality": "Gomti Nagar, Lucknow",
+    "wishlist": [
+      "srv_beauty_1",
+      "srv_smart_1"
+    ],
+    "created_at": "2026-06-01T12:00:00Z"
+  },
+  {
+    "id": "usr_1782812051889",
+    "name": "Guest User",
+    "email": "",
+    "phone": "6472292122",
+    "role": "CUSTOMER",
+    "locality": "Hazratganj, Lucknow",
+    "wishlist": [],
+    "created_at": "2026-06-30T09:34:11.889Z"
+  }
+]

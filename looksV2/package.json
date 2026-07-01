@@ -1,0 +1,9 @@
+{
+  "name": "lakhnavi-sewa-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm.cmd install --prefix apps/server && npm.cmd install --prefix apps/web",
+    "dev": "node dev.js"
+  }
+}
