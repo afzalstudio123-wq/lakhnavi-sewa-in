@@ -2,7 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/components/AppContext';
-import { ShieldCheck, Users, BarChart3, TrendingUp, Check, X, AlertCircle, Loader2 } from 'lucide-react';
+import { ShieldCheck, Users, BarChart3, TrendingUp, Check, X, AlertCircle, Loader2, MessageSquare } from 'lucide-react';
+import { mockServices } from '../../../services/mockServices';
+import { Testimonial } from '../../../mock/database';
+
+// Feature components
+import { ComparisonDashboard } from '../../../features/comparison/ComparisonDashboard';
+import { THEME } from '../../../utils/theme';
 
 export default function AdminDashboard() {
   const { t, showToast } = useApp();
@@ -13,6 +19,8 @@ export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<any | null>(null);
   const [pendingProviders, setPendingProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [activeTab, setActiveTab] = useState<'ANALYTICS' | 'MODERATION'>('ANALYTICS');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +91,7 @@ export default function AdminDashboard() {
       ]);
     } finally {
       setLoading(false);
+      setTestimonials(mockServices.getTestimonials());
     }
   };
 
@@ -111,11 +120,19 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleModerateTestimonial = (id: string, status: 'APPROVED' | 'REJECTED') => {
+    mockServices.updateTestimonialStatus(id, status);
+    showToast(`Testimonial review has been moderated to ${status}`, 'success');
+    setTestimonials(mockServices.getTestimonials());
+  };
+
   const handleLock = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('admin_auth');
     showToast('Admin Panel locked.');
   };
+
+  const pendingTestimonials = testimonials.filter(t => t.status === 'PENDING');
 
   // 1. Password Protection Form
   if (!isAuthenticated) {
@@ -163,7 +180,7 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-12 flex flex-col gap-10">
       {/* Header */}
-      <div className="flex justify-between items-center border-b border-borderColor pb-6">
+      <div className="flex justify-between items-center border-b border-borderColor pb-6 text-left">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-ink flex items-center gap-2">
             <BarChart3 className="text-primary" /> Admin Control Desk
@@ -179,40 +196,41 @@ export default function AdminDashboard() {
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-4 border-b border-borderColor pb-3 text-sm font-bold text-muted justify-start">
+        <button
+          onClick={() => setActiveTab('ANALYTICS')}
+          className={`pb-3 relative transition-all ${
+            activeTab === 'ANALYTICS' ? 'text-primary border-b-2 border-primary' : 'hover:text-ink'
+          }`}
+        >
+          Telemetry Analytics
+        </button>
+        <button
+          onClick={() => setActiveTab('MODERATION')}
+          className={`pb-3 relative transition-all ${
+            activeTab === 'MODERATION' ? 'text-primary border-b-2 border-primary' : 'hover:text-ink'
+          }`}
+        >
+          Moderation Center ({pendingTestimonials.length})
+        </button>
+      </div>
+
       {/* Loading Pane */}
       {loading || !analytics ? (
         <div className="flex flex-col items-center justify-center py-40 gap-3">
           <Loader2 className="text-primary animate-spin" size={32} />
           <span className="text-xs font-bold text-muted uppercase">Syncing server metrics...</span>
         </div>
-      ) : (
-        <>
-          {/* Metrics Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-canvas border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm">
-              <span className="text-xs font-bold text-muted uppercase">{t('statsTotalRevenue')}</span>
-              <span className="text-3xl font-black text-ink">₹{analytics.totalRevenue}</span>
-            </div>
-
-            <div className="bg-canvas border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm">
-              <span className="text-xs font-bold text-muted uppercase">{t('statsBookings')}</span>
-              <span className="text-3xl font-black text-ink">{analytics.bookingsCount}</span>
-            </div>
-
-            <div className="bg-canvas border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm">
-              <span className="text-xs font-bold text-muted uppercase">{t('statsProviders')}</span>
-              <span className="text-3xl font-black text-ink">{analytics.providersCount}</span>
-            </div>
-
-            <div className="bg-canvas border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm">
-              <span className="text-xs font-bold text-muted uppercase">{t('statsCustomers')}</span>
-              <span className="text-3xl font-black text-ink">{analytics.customersCount}</span>
-            </div>
-          </div>
+      ) : activeTab === 'ANALYTICS' ? (
+        <div className="flex flex-col gap-10">
+          
+          {/* Comparison Dashboard (SVG charts & sectors comparison) */}
+          <ComparisonDashboard />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Left: Provider Approvals */}
-            <div className="lg:col-span-2 flex flex-col gap-6">
+            <div className="lg:col-span-2 flex flex-col gap-6 text-left">
               <h2 className="text-xl font-extrabold text-ink flex items-center gap-2">
                 <Users size={18} className="text-primary" /> Pending Provider Approvals ({pendingProviders.length})
               </h2>
@@ -224,7 +242,7 @@ export default function AdminDashboard() {
               ) : (
                 <div className="flex flex-col gap-4">
                   {pendingProviders.map((p) => (
-                    <div key={p.id} className="bg-canvas border border-borderColor rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
+                    <div key={p.id} className="bg-white border border-borderColor rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
                       <div className="flex flex-col gap-1">
                         <h3 className="font-extrabold text-base text-ink">{p.name}</h3>
                         <div className="flex flex-wrap gap-2 text-xs font-semibold text-muted mt-1">
@@ -260,7 +278,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Right: Category Distribution */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 text-left">
               <h2 className="text-xl font-extrabold text-ink flex items-center gap-2">
                 <TrendingUp size={18} className="text-accent" /> Categories Overview
               </h2>
@@ -277,7 +295,52 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-        </>
+        </div>
+      ) : (
+        /* Testimonials Moderation Tab */
+        <div className="flex flex-col gap-6 text-left">
+          <h2 className="text-xl font-extrabold text-ink flex items-center gap-2">
+            <MessageSquare size={18} className="text-primary" /> Vetting Testimonial Reviews ({pendingTestimonials.length})
+          </h2>
+
+          {pendingTestimonials.length === 0 ? (
+            <div className="border border-borderColor/80 bg-surface rounded-2xl py-12 text-center text-xs font-bold text-muted uppercase">
+              No testimonials pending review.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {pendingTestimonials.map((t) => (
+                <div key={t.id} className="bg-white border border-borderColor rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
+                  <div className="flex-grow">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-extrabold text-sm text-ink">{t.authorName}</h4>
+                      <span className="text-[9px] font-bold text-primary uppercase tracking-wide bg-primary/5 px-2 py-0.5 rounded-md">
+                        {t.role}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted font-medium italic mt-2">"{t.reviewText}"</p>
+                  </div>
+
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => handleModerateTestimonial(t.id, 'REJECTED')}
+                      className="p-2.5 border border-semantic-error/30 hover:bg-semantic-error/10 text-semantic-error rounded-xl transition-all"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleModerateTestimonial(t.id, 'APPROVED')}
+                      className="bg-semantic-success hover:bg-emerald-600 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center gap-1"
+                    >
+                      <Check size={14} />
+                      <span>Approve</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

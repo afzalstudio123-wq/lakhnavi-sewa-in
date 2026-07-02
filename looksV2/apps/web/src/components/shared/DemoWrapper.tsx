@@ -11,6 +11,29 @@ export const DemoWrapper: React.FC<{ children: React.ReactNode }> = ({ children 
   const pathname = usePathname();
 
   const [currentPersona, setCurrentPersona] = useState<'customer' | 'provider' | 'admin'>('customer');
+  const [isOnline, setIsOnline] = useState(true);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setIsOnline(window.navigator.onLine);
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      showToast('Connection re-established! Syncing offline database...', 'success');
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      showToast('Connection lost. Operating in offline resilient mode.', 'warning');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [showToast]);
 
   // Track the active user role to update switcher state
   useEffect(() => {
@@ -65,6 +88,12 @@ export const DemoWrapper: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <>
+      {!isOnline && (
+        <div className="bg-semantic-warning text-white text-[10px] font-black uppercase tracking-widest text-center py-2.5 px-4 sticky top-0 z-[100] flex items-center justify-center gap-2 shadow-md animate-in slide-in-from-top duration-200">
+          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+          <span>Offline resilience mode active / ऑफ़लाइन मोड सक्रिय</span>
+        </div>
+      )}
       {children}
       <PersonaSwitcher currentPersona={currentPersona} onPersonaChange={handlePersonaChange} />
     </>

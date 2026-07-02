@@ -6,12 +6,20 @@ import { useApp } from '@/components/AppContext';
 import { ArrowUpRight, Check, X, Calendar, Clock, MapPin, Sparkles, Loader2, IndianRupee } from 'lucide-react';
 import PartnerPanel from '@/components/dashboards/PartnerPanel';
 
+// Features imports
+import { WalletLedger } from '../../../features/wallet/WalletLedger';
+import { TrainingPortal } from '../../../features/reward/TrainingPortal';
+import { WorkProgressStepper } from '../../../features/progress/WorkProgressStepper';
+import { SosButton } from '../../../features/sos/SosButton';
+import { THEME } from '../../../utils/theme';
+
 export default function ProviderDashboard() {
   const { t, user, showToast, language } = useApp();
   const router = useRouter();
 
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'DISPATCHES' | 'WALLET' | 'ACADEMY'>('DISPATCHES');
 
   // Redirect if not provider
   useEffect(() => {
@@ -76,14 +84,17 @@ export default function ProviderDashboard() {
 
   // Compute metrics
   const leads = bookings.filter(b => b.status === 'PENDING');
-  const activeJobs = bookings.filter(b => b.status === 'CONFIRMED');
+  const activeJobs = bookings.filter(b => b.status === 'CONFIRMED' || b.status === 'ACCEPTED' || b.status === 'TRAVELLING' || b.status === 'ARRIVED' || b.status === 'STARTED');
   const completedJobs = bookings.filter(b => b.status === 'COMPLETED');
+  
+  // Calculate total earnings dynamically
   const totalEarnings = completedJobs.reduce((sum, b) => sum + b.total_amount, 0);
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-12 py-12 flex flex-col gap-10">
+      
       {/* Profile Header */}
-      <div className="bg-ink text-canvas border border-borderColor/10 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+      <div className="bg-ink text-canvas border border-borderColor/10 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden text-left">
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-[80px]" />
         
         <div className="flex items-center gap-4 relative z-10">
@@ -108,136 +119,168 @@ export default function ProviderDashboard() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-surface border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm">
+        <div className="bg-surface border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm text-left">
           <span className="text-xs font-bold text-muted uppercase">Total Earnings</span>
           <div className="flex items-center text-3xl font-black text-ink">
             <IndianRupee size={28} className="text-primary shrink-0" />
-            <span>{totalEarnings}</span>
+            <span className="font-mono">{totalEarnings}</span>
           </div>
         </div>
 
-        <div className="bg-surface border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm">
+        <div className="bg-surface border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm text-left">
           <span className="text-xs font-bold text-muted uppercase">Active Bookings</span>
-          <span className="text-3xl font-black text-ink">{activeJobs.length}</span>
+          <span className="text-3xl font-black text-ink font-mono">{activeJobs.length}</span>
         </div>
 
-        <div className="bg-surface border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm">
+        <div className="bg-surface border border-borderColor rounded-2xl p-6 flex flex-col gap-1.5 shadow-sm text-left">
           <span className="text-xs font-bold text-muted uppercase">Completed Jobs</span>
-          <span className="text-3xl font-black text-ink">{completedJobs.length}</span>
+          <span className="text-3xl font-black text-ink font-mono">{completedJobs.length}</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Left Column: Leads & Active jobs */}
-        <div className="lg:col-span-2 flex flex-col gap-10">
-          
-          {/* Active Jobs panel */}
-          <div className="flex flex-col gap-6">
-            <h2 className="text-xl font-extrabold text-ink flex items-center gap-2">
-              <Sparkles size={18} className="text-primary animate-spin" />
-              {t('activeJobs')} ({activeJobs.length})
-            </h2>
+      {/* Navigation tabs */}
+      <div className="flex gap-4 border-b border-borderColor pb-3 text-sm font-bold text-muted justify-start">
+        <button
+          onClick={() => setActiveTab('DISPATCHES')}
+          className={`pb-3 relative transition-all ${
+            activeTab === 'DISPATCHES' ? 'text-primary border-b-2 border-primary' : 'hover:text-ink'
+          }`}
+        >
+          Dispatches & leads
+        </button>
+        <button
+          onClick={() => setActiveTab('WALLET')}
+          className={`pb-3 relative transition-all ${
+            activeTab === 'WALLET' ? 'text-primary border-b-2 border-primary' : 'hover:text-ink'
+          }`}
+        >
+          UPI Wallet & Payouts
+        </button>
+        <button
+          onClick={() => setActiveTab('ACADEMY')}
+          className={`pb-3 relative transition-all ${
+            activeTab === 'ACADEMY' ? 'text-primary border-b-2 border-primary' : 'hover:text-ink'
+          }`}
+        >
+          Academy & Rewards
+        </button>
+      </div>
 
-            {loading ? (
-              <div className="py-12 text-center text-xs font-bold text-muted uppercase">Syncing...</div>
-            ) : activeJobs.length === 0 ? (
-              <div className="border border-borderColor/80 rounded-2xl py-12 text-center text-xs font-bold text-muted uppercase bg-surface">
-                No active bookings in progress.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {activeJobs.map((job) => (
-                  <div key={job.id} className="p-6 bg-canvas border border-borderColor rounded-2xl flex flex-col justify-between shadow-sm">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-bold bg-primary/10 text-primary px-2.5 py-1 rounded-md uppercase">
-                          {job.service ? job.service.category : 'General Job'}
-                        </span>
-                        <span className="text-xs font-bold text-muted">REF: {job.id}</span>
-                      </div>
-                      
-                      <h3 className="font-extrabold text-base text-ink">
-                        {job.service ? (language === 'en' ? job.service.title_en : job.service.title_hi) : 'Home Repairs'}
-                      </h3>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-semibold text-muted mt-2">
-                        <span className="flex items-center gap-1.5"><Calendar size={14} /> {job.scheduled_date}</span>
-                        <span className="flex items-center gap-1.5"><Clock size={14} /> {job.scheduled_time}</span>
-                        <span className="flex items-center gap-1.5"><MapPin size={14} className="text-accent" /> {job.address}</span>
-                      </div>
+      <div className="flex-grow">
+        {activeTab === 'DISPATCHES' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            {/* Left Column: Leads & Active jobs */}
+            <div className="lg:col-span-2 flex flex-col gap-10">
+              
+              {/* Active Jobs panel */}
+              <div className="flex flex-col gap-6">
+                <h2 className="text-xl font-extrabold text-ink flex items-center gap-2 text-left">
+                  <Sparkles className="text-primary animate-spin" size={18} />
+                  Active Pipelines ({activeJobs.length})
+                </h2>
 
-                      <div className="text-xs font-semibold text-muted border-t border-borderColor/50 mt-3 pt-3">
-                        Customer details: <span className="text-ink font-bold">{job.customer?.name} ({job.customer?.phone})</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center border-t border-borderColor/50 mt-4 pt-3">
-                      <span className="font-black text-ink text-sm">Payout: ₹{job.total_amount}</span>
-                      <button
-                        onClick={() => handleUpdateStatus(job.id, 'COMPLETED')}
-                        className="bg-primary hover:bg-primary-hover text-canvas font-bold text-xs py-2.5 px-4 rounded-xl transition-all flex items-center gap-1.5"
-                      >
-                        <Check size={14} />
-                        <span>{t('completeJob')}</span>
-                      </button>
-                    </div>
+                {loading ? (
+                  <div className="py-12 text-center text-xs font-bold text-muted uppercase">Syncing...</div>
+                ) : activeJobs.length === 0 ? (
+                  <div className="border border-borderColor/80 rounded-2xl py-12 text-center text-xs font-bold text-muted uppercase bg-surface">
+                    No active bookings in progress.
                   </div>
-                ))}
+                ) : (
+                  <div className="flex flex-col gap-8">
+                    {activeJobs.map((job) => (
+                      <WorkProgressStepper 
+                        key={job.id}
+                        bookingId={job.id}
+                        initialStatus={job.status}
+                        cost={job.total_amount}
+                        customerName={job.customer?.name || 'Arjun Mishra'}
+                        providerName={user.name || 'Priya Sharma'}
+                        onStatusChange={(nextStatus) => {
+                          // Sync status with mock database
+                          const offline = JSON.parse(localStorage.getItem('mock_bookings') || '[]');
+                          const idx = offline.findIndex((b: any) => b.id === job.id);
+                          if (idx !== -1) {
+                            offline[idx].status = nextStatus;
+                            localStorage.setItem('mock_bookings', JSON.stringify(offline));
+                          }
+                          loadData();
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Right Column: Leads Center & Safety SOS */}
+            <div className="flex flex-col gap-8">
+              
+              {/* Emergency SOS widget */}
+              <div className="bg-white border border-borderColor rounded-3xl p-6 shadow-sm flex flex-col gap-4 text-left">
+                <h3 className="font-extrabold text-sm text-ink uppercase tracking-wider">Partner SafeGuardSOS</h3>
+                <p className="text-xs text-muted font-medium leading-relaxed">
+                  Triggers immediate location shares to our Lucknow security nodes during gig execution.
+                </p>
+                <SosButton />
+              </div>
+
+              {/* Leads */}
+              <div className="flex flex-col gap-6">
+                <h2 className="text-xl font-extrabold text-ink text-left">{t('leads')} ({leads.length})</h2>
+
+                {loading ? (
+                  <div className="py-12 text-center text-xs font-bold text-muted uppercase">Syncing Leads...</div>
+                ) : leads.length === 0 ? (
+                  <div className="border border-borderColor/80 rounded-2xl py-16 text-center text-xs font-bold text-muted uppercase bg-surface flex flex-col gap-2 p-6">
+                    <span>📭</span>
+                    <span>All leads answered</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {leads.map((lead) => (
+                      <div key={lead.id} className="bg-surface border border-borderColor rounded-2xl p-5 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all text-left">
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded self-start uppercase">{lead.service?.category}</span>
+                          <h3 className="font-extrabold text-sm text-ink">{language === 'en' ? lead.service?.title_en : lead.service?.title_hi}</h3>
+                          <div className="flex flex-col gap-1 text-xs text-muted font-medium mt-1">
+                            <span>Date: {lead.scheduled_date}</span>
+                            <span>Time: {lead.scheduled_time}</span>
+                            <span>Locality: {lead.address}</span>
+                            <span>Customer: {lead.customer?.name}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between items-center border-t border-borderColor/60 pt-3">
+                          <span className="font-black text-sm text-ink font-mono">₹{lead.total_amount}</span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleUpdateStatus(lead.id, 'CANCELLED')}
+                              className="p-2 border border-semantic-error/30 hover:bg-semantic-error/10 text-semantic-error rounded-xl transition-colors"
+                              title={t('decline')}
+                            >
+                              <X size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleUpdateStatus(lead.id, 'CONFIRMED')}
+                              className="bg-primary hover:bg-primary-hover text-canvas font-bold text-xs py-2 px-3.5 rounded-xl transition-all flex items-center gap-1"
+                            >
+                              <Check size={14} />
+                              <span>{t('accept')}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Right Column: Leads Center */}
-        <div className="flex flex-col gap-6">
-          <h2 className="text-xl font-extrabold text-ink">{t('leads')} ({leads.length})</h2>
-
-          {loading ? (
-            <div className="py-12 text-center text-xs font-bold text-muted uppercase">Syncing Leads...</div>
-          ) : leads.length === 0 ? (
-            <div className="border border-borderColor/80 rounded-2xl py-16 text-center text-xs font-bold text-muted uppercase bg-surface flex flex-col gap-2 p-6">
-              <span>📭</span>
-              <span>All leads answered</span>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {leads.map((lead) => (
-                <div key={lead.id} className="bg-surface border border-borderColor rounded-2xl p-5 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded self-start uppercase">{lead.service?.category}</span>
-                    <h3 className="font-extrabold text-sm text-ink">{language === 'en' ? lead.service?.title_en : lead.service?.title_hi}</h3>
-                    <div className="flex flex-col gap-1 text-xs text-muted font-medium mt-1">
-                      <span>Date: {lead.scheduled_date}</span>
-                      <span>Time: {lead.scheduled_time}</span>
-                      <span>Locality: {lead.address}</span>
-                      <span>Customer: {lead.customer?.name}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center border-t border-borderColor/60 pt-3">
-                    <span className="font-black text-sm text-ink">₹{lead.total_amount}</span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleUpdateStatus(lead.id, 'CANCELLED')}
-                        className="p-2 border border-semantic-error/30 hover:bg-semantic-error/10 text-semantic-error rounded-xl transition-colors"
-                        title={t('decline')}
-                      >
-                        <X size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleUpdateStatus(lead.id, 'CONFIRMED')}
-                        className="bg-primary hover:bg-primary-hover text-canvas font-bold text-xs py-2 px-3.5 rounded-xl transition-all flex items-center gap-1"
-                      >
-                        <Check size={14} />
-                        <span>{t('accept')}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        ) : activeTab === 'WALLET' ? (
+          <WalletLedger />
+        ) : (
+          <TrainingPortal />
+        )}
       </div>
 
       {/* Service Catalog & Rate Card Management */}
