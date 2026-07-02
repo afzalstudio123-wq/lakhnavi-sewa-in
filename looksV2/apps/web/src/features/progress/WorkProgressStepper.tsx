@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../components/AppContext';
 import { mockServices } from '../../services/mockServices';
-import { Check, Clock, ShieldCheck, KeyRound, Camera, Plus, Sparkles, Image, IndianRupee } from 'lucide-react';
+import { Check, Clock, ShieldCheck, KeyRound, Camera, Plus, Sparkles, Image, IndianRupee, Loader2 } from 'lucide-react';
 import { THEME } from '../../utils/theme';
 
 interface StepperProps {
